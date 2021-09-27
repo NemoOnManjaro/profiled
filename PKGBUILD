@@ -4,12 +4,12 @@
 
 pkgname=profiled-git
 pkgver=1.0.12.r0.g32b02ae
-pkgrel=1
+pkgrel=4
 pkgdesc="Sailfish Profile daemon, manages user settings"
 arch=('x86_64' 'aarch64')
 url="https://github.com/sailfishos/profiled"
 license=('BSD')
-depends=('dbus-glib')
+depends=('dbus-glib' 'profiled-settings-nemo')
 makedepends=('git' 'doxygen')
 provides=("${pkgname%-git}")
 source=(
@@ -32,13 +32,12 @@ prepare() {
 
 build() {
   cd "${srcdir}/${pkgname}"
-  make
+  make ROOT=${pkgdir}
 }
 
 package() {
   cd "${srcdir}/${pkgname}"
-  make install
-  mv /tmp/test-profiled/usr ${pkgdir}
-  mv /tmp/test-profiled/etc ${pkgdir}
+  make ROOT=${pkgdir} install
+  rm -rf ${pkgdir}/etc/profiled
 }
 
