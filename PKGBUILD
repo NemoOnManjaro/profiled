@@ -1,43 +1,36 @@
 ## $Id$
 # Contributor: Alexey Andreyev <aa13q@ya.ru>
+# Contributor: Chupligin Sergey (NeoChapay) <neochapay@gmail.com>
 # Maintainer: James Kittsmiller (AJSlye) <james@nulogicsystems.com>
 
-pkgname=profiled-git
-pkgver=1.0.13.r0.gd3d2b21
+pkgname=profiled
+pkgver=1.0.13
 pkgrel=1
 pkgdesc="Sailfish Profile daemon, manages user settings"
 arch=('x86_64' 'aarch64')
 url="https://github.com/sailfishos/profiled"
 license=('BSD')
 depends=('dbus-glib' 'profiled-settings-nemo')
-makedepends=('git' 'doxygen')
-provides=("${pkgname%-git}")
-source=(
-  "${pkgname}::git+${url}"
-)
-sha256sums=('SKIP')
-
-pkgver() {
-  cd "${srcdir}/${pkgname}"
-  ( set -o pipefail
-    git describe --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g' ||
-    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
-  ) 2>/dev/null
-}
+makedepends=('doxygen' 'git')
+source=("${url}/archive/refs/tags/$pkgver.tar.gz")
+sha256sums=('6345ac55e25afb568fcf7b4f7faf5e0b36d68d9fb724e2de47796439fb7d2f67')
 
 prepare() {
-    cd "$srcdir/${pkgname}"
-    git submodule update --init --recursive
+    cd $pkgname-$pkgver
+    rm -rf dbus-gmain
+    git clone https://github.com/sailfishos-mirror/dbus-glib.git dbus-gmain
+    cd dbus-gmain
+    git reset --hard d42176ae4763e5288ef37ea314fe58387faf2005
+    cd ../
 }
 
 build() {
-  cd "${srcdir}/${pkgname}"
+  cd $pkgname-$pkgver
   make ROOT=${pkgdir}
 }
 
 package() {
-  cd "${srcdir}/${pkgname}"
+  cd $pkgname-$pkgver
   make ROOT=${pkgdir} install
   rm -rf ${pkgdir}/etc/profiled
 }
-
